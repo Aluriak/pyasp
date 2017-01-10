@@ -11,7 +11,7 @@ from .. import asp
 def build_solver(constants={}, gringo_options='', clasp_options=''):
     """Return an asp.Gringo4Clasp object built using parameters values."""
     # build gringo options by adding the constants
-    constants = ' -c '.join(str(k)+'='+str(v) for k,v in constants.items())
+    constants = ' -c '.join(str(k)+'='+str(v) for k, v in constants.items())
     if len(constants) > 0:
         constants = '-c ' + constants
     gringo_options = constants + ' ' + gringo_options
@@ -72,3 +72,15 @@ class TestGringo4Clasp(unittest.TestCase):
         with self.assertRaises(Exception):
             solver = build_solver({'v':constant})
             solver.run([], additionalProgramText='#const v=1. p(v).')
+
+    def test_version(self):
+        self.assertIsInstance(asp.Gringo.version(), str)
+        self.assertIsInstance(asp.Gringo.version_text(), str)
+        self.assertIsInstance(asp.Gringo4.version(), str)
+        self.assertIsInstance(asp.Gringo4.version_text(), str)
+        self.assertIsInstance(asp.Clasp.version(), str)
+        self.assertIsInstance(asp.Clasp.version_text(), str)
+        self.assertIsInstance(asp.Gringo4Clasp.version(), tuple)
+        self.assertIsInstance(asp.Gringo4Clasp.version_text(), tuple)
+        self.assertIsInstance(asp.GringoClaspBase.version(), tuple)
+        self.assertIsInstance(asp.GringoClaspBase.version_text(), tuple)
