@@ -37,7 +37,7 @@ class CollapsableAtomVisitor(ap.PTNodeVisitor):
         if self.collapseAtoms:
             return (predicate + '(' + ','.join(*args) + ')') if args else predicate
         else:
-            return Term(predicate, list(args[0])) if args else predicate
+            return Term(predicate, list(args[0]) if args else [])
 
     def visit_terms(self, node, children):
         return TermSet(children)
