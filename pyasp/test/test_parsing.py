@@ -1,11 +1,15 @@
 
 
+import pytest
+
 from pyasp import parsing
+from pyasp.parsing import Parser, OldParser
+from pyasp.term import Term, TermSet
 
 
 def test_simple_case():
-    parsed = parsing.clasp_output(OUTCLASP_SIMPLE.splitlines(),
-                                  yield_stats=True, yield_info=True)
+    parsed = Parser().parse_clasp_output(OUTCLASP_SIMPLE.splitlines(),
+                                         yield_stats=True, yield_info=True)
     models = []
     for type, payload in parsed:
         assert type in ('statistics', 'info', 'answer')
@@ -22,8 +26,50 @@ def test_simple_case():
                      'Time': '0.001s (Solving: 0.00s 1st Model: 0.00s Unsat: 0.00s)'}
 
 
+def test_parse_termset_default():
+    string = 'a(b,10) c(d("a",d_d),"v,v",c) d(-2,0)'
+    expected = TermSet((
+        Term('a', ['b', '10']),
+        Term('c', ['d("a",d_d)', '"v,v"', 'c']),
+        Term('d', ['-2', '0']),
+    ))
+    assert Parser().parse_terms(string) == expected
+
+
+def test_parse_termset():
+    string = 'a(b,10) c(d("a",d_d),"v,v",c) d(-2,0)'
+    expectation = {
+        (True, False): TermSet((
+            Term('a', ['b', '10']),
+            Term('c', ['d("a",d_d)', '"v,v"', 'c']),
+            Term('d', ['-2', '0']),
+        )),
+        (False, False): TermSet((
+            Term('a', ['b', 10]),
+            Term('c', [Term('d', ['"a"', 'd_d']), '"v,v"', 'c']),
+            Term('d', [-2, 0]),
+        )),
+        (True, True): TermSet((
+            'a(b,10)',
+            'c(d("a",d_d),"v,v",c)',
+            'd(-2,0)',
+        )),
+        # False True is expected to raise an Error (see dedicated function)
+    }
+    for parser_mode, expected in expectation.items():
+        print(*parser_mode)
+        assert OldParser(*parser_mode).parse_terms(string) == expected
+        assert    Parser(*parser_mode).parse_terms(string) == expected
+
+def test_parse_termset_impossible():
+    with pytest.raises(ValueError) as e_info:
+        OldParser(False, True)
+    with pytest.raises(ValueError) as e_info:
+        Parser(False, True)
+
+
 def test_complex_atoms():
-    parsed = parsing.clasp_output(OUTCLASP_COMPLEX_ATOMS.splitlines())
+    parsed = Parser().parse_clasp_output(OUTCLASP_COMPLEX_ATOMS.splitlines())
     type, model = next(parsed)
     assert next(parsed, None) is None, "there is only one model"
     assert type == 'answer', "the model is an answer"
@@ -34,7 +80,7 @@ def test_complex_atoms():
 
 
 def test_optimization():
-    parsed = parsing.clasp_output(OUTCLASP_OPTIMIZATION.splitlines(), yield_stats=True)
+    parsed = Parser().parse_clasp_output(OUTCLASP_OPTIMIZATION.splitlines(), yield_stats=True)
     expected_stats = {
         'CPU Time': '0.130s',
         'Calls': '1',
@@ -50,7 +96,7 @@ def test_optimization():
 
 
 def test_unsat():
-    parsed = parsing.clasp_output(OUTCLASP_UNSATISFIABLE.splitlines())
+    parsed = Parser().parse_clasp_output(OUTCLASP_UNSATISFIABLE.splitlines())
     assert next(parsed, None) is None
 
 
