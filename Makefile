@@ -38,9 +38,12 @@ clean:
 	rm -rf build/ MANIFEST
 	find . -name '*.pyc' -delete
 
-t: unittest
+
+t: pytest
 unittest:
 	$(PYTHON) -m unittest discover -v
+pytest:
+	pytest pyasp/ --doctest-module
 
 run:
 	$(PYTHON) -m $(PACKAGE)
