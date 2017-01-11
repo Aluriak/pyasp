@@ -8,3 +8,4 @@ asp_py_lextab.py
 asp_py_parsetab.py
 pyasp/bin/clasp
 pyasp/bin/gringo*
+.cache/
