@@ -14,6 +14,19 @@ from pyasp.term import Term, TermSet
 
 
 class CollapsableAtomVisitor(ap.PTNodeVisitor):
+    """Implement both the grammar and the way to handle it, dedicated to the
+    parsing of ASP like string to produce TermSet instances.
+
+    This is a more complex version than AtomVisitor, because implementing
+    special use cases, notably partial cut of parsed atoms.
+
+    collapseTerms: function terms in predicate arguments are collapsed into strings
+    collapseAtoms: atoms (predicate plus terms) are collapsed into strings
+                   requires that collapseTerms is True
+
+    See Parser class for usage examples.
+
+    """
     def __init__(self, collapseTerms=True, collapseAtoms=False):
         super().__init__()
         self.collapseTerms = bool(collapseTerms)
@@ -55,6 +68,13 @@ class CollapsableAtomVisitor(ap.PTNodeVisitor):
 
 
 class AtomVisitor(ap.PTNodeVisitor):
+    """Implement both the grammar and the way to handle it, dedicated to the
+    parsing of ASP like string to produce TermSet instances.
+
+    This is a simpler version than CollapsableAtomVisitor, which implement
+    special use cases, notably partial cut of parsed atoms.
+
+    """
 
     def visit_number(self, node, children):
         return int(node.value)
