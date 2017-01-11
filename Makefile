@@ -43,7 +43,7 @@ t: pytest
 unittest:
 	$(PYTHON) -m unittest discover -v
 pytest:
-	pytest pyasp/ --doctest-module
+	pytest pyasp/ --doctest-module -v
 
 run:
 	$(PYTHON) -m $(PACKAGE)
