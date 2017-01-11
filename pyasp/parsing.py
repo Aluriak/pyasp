@@ -2,12 +2,46 @@
 Wrapper around the pyasp.ply submodule.
 
 """
+import re
 import inspect
 
 import pyasp.ply.lex as lex
 import pyasp.ply.yacc as yacc
 from pyasp.constant import OPTIMIZE
 from pyasp.term import Term, TermSet
+
+REGEX_ANSWER_HEADER = re.compile(r"Answer: [0-9]+")
+
+def clasp_output(output:iter, *, yield_stats:bool=False, yield_info:bool=False):
+    output = iter(output)
+
+    info = (next(output), next(output), next(output),)
+    if yield_info:
+        yield 'info', info
+
+    while True:
+        line = next(output)
+        if REGEX_ANSWER_HEADER.fullmatch(line):
+            next_line = next(output)
+            answer = terms(next_line)
+            yield 'answer', answer
+        if not line.strip():  # empty line: statistics are beginning
+            if not yield_stats: break  # stats are the last part of the output
+            stats = {}
+            for line in output:
+                sep = line.find(':')
+                key, value = line[:sep], line[sep+1:]
+                stats[key.strip()] = value.strip()
+            yield 'statistics', stats
+
+
+def terms(string):
+    return TermSet.from_string(string)
+    return TermSet(term(atom) for atom in string.split(' '))
+
+def term(string):
+    pass
+
 
 
 class Lexer:
