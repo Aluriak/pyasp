@@ -114,9 +114,10 @@ class GringoClaspBase(object):
     def version(gringo_bin=BIN_GRINGO3, clasp_bin=BIN_CLASP):
         """Return the version number as string"""
         gringo, clasp = GringoClaspBase.version_text(gringo_bin, clasp_bin)
+        REGEX_VERSION_NUMBER = re.compile(r"[a-z]+ version ([0-9]+\.[0-9]+\.[0-9]+)")
         return (
-            REGEX_VERSION_NUMBER.search(gringo).group() if gringo else None,
-            REGEX_VERSION_NUMBER.search(clasp).group() if clasp else None,
+            REGEX_VERSION_NUMBER.search(gringo).groups()[0] if gringo else None,
+            REGEX_VERSION_NUMBER.search(clasp).groups()[0] if clasp else None,
         )
 
     def __ground__(self, programs, additionalProgramText):
