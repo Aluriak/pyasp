@@ -73,14 +73,39 @@ class TestGringo4Clasp(unittest.TestCase):
             solver = build_solver({'v':constant})
             solver.run([], additionalProgramText='#const v=1. p(v).')
 
-    def test_version(self):
-        self.assertIsInstance(asp.Gringo.version(), str)
-        self.assertIsInstance(asp.Gringo.version_text(), str)
-        self.assertIsInstance(asp.Gringo4.version(), str)
-        self.assertIsInstance(asp.Gringo4.version_text(), str)
-        self.assertIsInstance(asp.Clasp.version(), str)
-        self.assertIsInstance(asp.Clasp.version_text(), str)
-        self.assertIsInstance(asp.Gringo4Clasp.version(), tuple)
-        self.assertIsInstance(asp.Gringo4Clasp.version_text(), tuple)
-        self.assertIsInstance(asp.GringoClaspBase.version(), tuple)
-        self.assertIsInstance(asp.GringoClaspBase.version_text(), tuple)
+    # def test_version(self):
+        # self.assertIsInstance(asp.Gringo.version(), str)
+        # self.assertIsInstance(asp.Gringo.version_text(), str)
+        # self.assertIsInstance(asp.Gringo4.version(), str)
+        # self.assertIsInstance(asp.Gringo4.version_text(), str)
+        # self.assertIsInstance(asp.Clasp.version(), str)
+        # self.assertIsInstance(asp.Clasp.version_text(), str)
+        # self.assertIsInstance(asp.Gringo4Clasp.version(), tuple)
+        # self.assertIsInstance(asp.Gringo4Clasp.version_text(), tuple)
+        # self.assertIsInstance(asp.GringoClaspBase.version(), tuple)
+        # self.assertIsInstance(asp.GringoClaspBase.version_text(), tuple)
+
+
+    def test_time_limit(self):
+        solver = build_solver(clasp_options='--time-limit=1')
+        for answer in solver.run([], additionalProgramText=QUEENS):
+            print(answer)
+
+
+QUEENS = """
+#const n = 200.
+n(1..n).
+
+q(X,Y) :- n(X), n(Y), not not q(X,Y).
+
+        c(r,X; c,Y) :- q(X,Y).
+not not c(r,N; c,N) :- n(N).
+
+n(r,X,Y-1,X,Y; c,X-1,Y,X,Y; d1,X-1,Y-1,X,Y;     d2,X-1,Y+1,X,Y      ) :- n(X), n(Y).
+c(r,N,0;       c,0,N;       d1,N-1,0; d1,0,N-1; d2,N-1,n+1; d2,0,N+1) :- n(N).
+
+c(C,XX,YY) :-     c(C,X,Y), n(C,X,Y,XX,YY), not q(XX,YY).
+           :- not c(C,X,Y), n(C,X,Y,XX,YY),     q(XX,YY).
+
+#show q/2.
+"""
