@@ -156,6 +156,7 @@ setup(
     author='Sven Thiele',
     author_email='sthiele78@gmail.com',
     zip_safe=False,  # not zippable because of the binary retrieving
+    install_require=['arpeggio==1.5']
 
     package_dir = { 'pyasp' : 'pyasp'},
     package_data = {
