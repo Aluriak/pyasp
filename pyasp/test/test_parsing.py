@@ -76,7 +76,6 @@ def test_complex_atoms():
     assert len(model) == 3, "only 3 atoms in it"
     atoms = {atom.predicate: atom for atom in model}
     assert set(atoms.keys()) == {'a', 'b', 'c'}
-    # TODO: make the term parser
 
 
 def test_optimization():
@@ -95,11 +94,67 @@ def test_optimization():
             assert model == expected_stats
 
 
+def test_time_limit():
+    parsed = Parser().parse_clasp_output(OUTCLASP_TIME_LIMIT.splitlines(),
+                                         yield_stats=True,
+                                         yield_info=True)
+    expected_stats = {
+        'TIME LIMIT': '1',
+        'Models': '3+',
+        'Optimum': 'unknown',
+        'Optimization': '597301577',
+        'Calls': '1',
+        'Time': '4.000s (Solving: 2.82s 1st Model: 0.01s Unsat: 0.00s)',
+        'CPU Time': '3.980s',
+    }
+    expected_info = tuple(OUTCLASP_TIME_LIMIT.splitlines()[:3])
+    expected_answer = iter((
+        TermSet((Term('a'),)), TermSet((Term('b'),)), TermSet((Term('c'),))
+    ))
+    for type, model in parsed:
+        if type == 'statistics':
+            assert model == expected_stats
+        elif type == 'info':
+            assert model == expected_info
+        elif type == 'answer':
+            assert model == next(expected_answer)
+        else:  # impossible
+            assert False
+
+
 def test_unsat():
     parsed = Parser().parse_clasp_output(OUTCLASP_UNSATISFIABLE.splitlines())
     assert next(parsed, None) is None
 
 
+def test_truc():
+    import json
+    print(json.loads(OUTCLASP_COMPLEX_ATOMS))
+    assert False
+
+
+OUTCLASP_TIME_LIMIT = """clingo version 4.5.4
+Reading from search.lp ...
+Solving...
+Answer: 1
+a
+Optimization: 597337713
+Answer: 2
+b
+Optimization: 597301761
+Answer: 3
+c
+Optimization: 597301577
+SATISFIABLE
+
+TIME LIMIT   : 1
+Models       : 3+
+  Optimum    : unknown
+Optimization : 597301577
+Calls        : 1
+Time         : 4.000s (Solving: 2.82s 1st Model: 0.01s Unsat: 0.00s)
+CPU Time     : 3.980s
+"""
 
 OUTCLASP_COMPLEX_ATOMS = """clasp version 3.2.0
 Reading from stdin
