@@ -157,7 +157,8 @@ class Parser:
         output -- iterable of lines or full clasp output to parse
         yield_stats -- yields final statistics as a mapping {field: value}
                        under type 'statistics'
-        yield_info  -- yields first 3 lines output by solver under type 'info'
+        yield_info  -- yields first lines not related to first answer
+                       under type 'info' as a tuple of lines
 
         In any case, tuple ('answer', termset) will be returned
         with termset a TermSet instance containing all atoms in the found model.
@@ -167,13 +168,21 @@ class Parser:
         """
         REGEX_ANSWER_HEADER = re.compile(r"Answer: [0-9]+")
         output = iter(output.splitlines() if isinstance(output, str) else output)
+        modes = iter(('info', 'answers', 'statistics'))
+        mode = next(modes)
 
-        info = (next(output), next(output), next(output),)
-        if yield_info:
-            yield 'info', info
-
-        while True:
+        # all lines until meeting "Answer: 1" belongs to the info lines
+        info = []
+        line = ''
+        line = next(output)
+        while not REGEX_ANSWER_HEADER.fullmatch(line):
+            info.append(line)
             line = next(output)
+        if yield_info:
+            yield 'info', tuple(info)
+
+        # first answer begins
+        while True:
             if REGEX_ANSWER_HEADER.fullmatch(line):
                 next_line = next(output)
                 answer = self.parse_terms(next_line)
@@ -186,6 +195,7 @@ class Parser:
                     key, value = line[:sep], line[sep+1:]
                     stats[key.strip()] = value.strip()
                 yield 'statistics', stats
+            line = next(output)
 
 
 
