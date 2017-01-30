@@ -174,7 +174,10 @@ class GringoClaspBase(object):
         solving, self.clasp_stderr = self._clasp.communicate(grounding)
         self.clasp_stderr = solving + self.clasp_stderr
 
-        if self._clasp.returncode not in self.clasp_noerror_retval:
+        TIME_LIMIT_REACHED_ERROR_CODE = 11
+        if self._clasp.returncode == TIME_LIMIT_REACHED_ERROR_CODE and b'TIME LIMIT' in solving:
+            pass  # time limit reached
+        elif self._clasp.returncode not in self.clasp_noerror_retval:
             error = "got error %d from clasp:\n%s" % (self._clasp.returncode,
                                                       self.clasp_stderr.decode())
             try:
