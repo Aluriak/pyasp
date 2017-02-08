@@ -133,7 +133,7 @@ class Parser:
         self.grammar = self.atom_visitor.grammar()
         self.callback = callback
         if self.collapseAtoms and not self.collapseTerms:
-            raise ValueError("if atoms are collapsed, functions must"
+            raise ValueError("if atoms are collapsed, terms must"
                              " also be collapsed!")
 
 
