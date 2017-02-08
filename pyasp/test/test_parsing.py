@@ -127,12 +127,6 @@ def test_unsat():
     assert next(parsed, None) is None
 
 
-def test_truc():
-    import json
-    print(json.loads(OUTCLASP_COMPLEX_ATOMS))
-    assert False
-
-
 OUTCLASP_TIME_LIMIT = """clingo version 4.5.4
 Reading from search.lp ...
 Solving...
