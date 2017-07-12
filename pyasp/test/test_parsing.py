@@ -68,6 +68,18 @@ def test_parse_termset_impossible():
         Parser(False, True)
 
 
+def test_string():
+    """Show that string with comma in it is handled correctly"""
+    parsed = Parser().parse_clasp_output(OUTCLASP_STRING.splitlines())
+    type, model = next(parsed)
+    assert next(parsed, None) is None, "there is only one model"
+    assert type == 'answer', "the model is an answer"
+    assert len(model) == 1, "only 1 atom in it"
+    atom = next(iter(model))
+    assert atom.predicate == 'atom'
+    assert atom.arguments == ['","',]
+
+
 def test_complex_atoms():
     parsed = Parser().parse_clasp_output(OUTCLASP_COMPLEX_ATOMS.splitlines())
     type, model = next(parsed)
@@ -161,6 +173,19 @@ Models       : 1
 Calls        : 1
 Time         : 0.001s (Solving: 0.00s 1st Model: 0.00s Unsat: 0.00s)
 CPU Time     : 0.000s
+"""
+
+OUTCLASP_STRING = """clasp version 3.2.0
+Reading from test.lp
+Solving...
+Answer: 1
+atom(",")
+SATISFIABLE
+
+Models       : 1
+Calls        : 1
+Time         : 0.001s (Solving: 0.00s 1st Model: 0.00s Unsat: 0.00s)
+CPU Time     : 0.001s
 """
 
 OUTCLASP_SIMPLE = """clasp version 3.2.0
