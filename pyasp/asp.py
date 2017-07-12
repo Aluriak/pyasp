@@ -174,9 +174,20 @@ class GringoClaspBase(object):
         solving, self.clasp_stderr = self._clasp.communicate(grounding)
         self.clasp_stderr = solving + self.clasp_stderr
 
-        TIME_LIMIT_REACHED_ERROR_CODE = 11
-        if self._clasp.returncode == TIME_LIMIT_REACHED_ERROR_CODE and b'TIME LIMIT' in solving:
-            pass  # time limit reached
+        # According to clasp documentation, clasp error code follows this convention:
+        ERROR_CODES = {
+            10: "the problem was found to be satisfiable",
+            11: "the problem was found to be satisfiable but a time limit interrupted the search",
+            20: "the problem was proved to be unsatisfiable",
+            127: "clasp ran out of memory",
+            0: "satisfiability of problem is not known, because search was either interrupted or not started",
+            1: "clasp encountered an error",
+        }
+        TIME_LIMIT_REACHED = 11
+        if b'TIME LIMIT' in solving and self._clasp.returncode in {11, 1}:
+            # if it's 11, at least one model have been found.
+            # if it's 1, no model have been found.
+            pass  # time limit reached: nothing to do
         elif self._clasp.returncode not in self.clasp_noerror_retval:
             error = "got error %d from clasp:\n%s" % (self._clasp.returncode,
                                                       self.clasp_stderr.decode())
