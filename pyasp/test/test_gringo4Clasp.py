@@ -86,10 +86,24 @@ class TestGringo4Clasp(unittest.TestCase):
         self.assertIsInstance(asp.GringoClaspBase.version_text(), tuple)
 
 
-    def test_time_limit(self):
+    def test_time_limit_with_solutions(self):
+        """Sudoku yield thousands of solution in a second"""
+        solver = build_solver(clasp_options='--time-limit=1')
+        for answer in solver.run([], additionalProgramText=SUDOKU):
+            pass
+
+    def test_time_limit_no_solutions(self):
+        """Queens do not yield any solution in a second
+        (at least on not so powerful machines)
+
+        This is tested because clasp do not raise the same error code
+        depending of whether a solution was found or not when stopped
+        because of the --time-limit option.
+
+        """
         solver = build_solver(clasp_options='--time-limit=1')
         for answer in solver.run([], additionalProgramText=QUEENS):
-            print(answer)
+            pass
 
 
 QUEENS = """
@@ -108,4 +122,20 @@ c(C,XX,YY) :-     c(C,X,Y), n(C,X,Y,XX,YY), not q(XX,YY).
            :- not c(C,X,Y), n(C,X,Y,XX,YY),     q(XX,YY).
 
 #show q/2.
+"""
+
+
+SUDOKU = """
+val(1..9).
+border(1;4;7).
+
+% Only one number per square.
+1 { x(X,Y,N) : val(N) } 1 :- val(X) ; val(Y).
+
+% Same numbers does not share row or column…
+1 { x(X,Y,N) : val(X) } 1 :- val(N) ; val(Y).
+1 { x(X,Y,N) : val(Y) } 1 :- val(N) ; val(X). 
+
+% … nor boxes.
+1 { x(X,Y,N) : val(X), val(Y), X1<=X, X<=X1+2, Y1<=Y, Y<=Y1+2 } 1 :- val(N) ; border(X1) ; border(Y1).
 """
