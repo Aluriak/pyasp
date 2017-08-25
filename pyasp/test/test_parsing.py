@@ -2,9 +2,22 @@
 
 import pytest
 
-from pyasp import parsing
+from pyasp import asp, parsing
 from pyasp.parsing import Parser, OldParser
 from pyasp.term import Term, TermSet
+
+
+def test_dangerous_string():
+    dangerous_string = '"1,3-dimethyl-2-[2-oxopropyl thio]imidazolium chloride"'
+    solver = asp.Gringo4Clasp()
+    for sol in solver.run([], collapseAtoms=False,
+                          additionalProgramText='atom({}).'.format(dangerous_string)):
+        print(sol)
+        assert len(sol) == 1
+        atom = next(iter(sol))
+        assert atom.predicate == 'atom'
+        assert len(atom.args()) == 1
+        assert atom.args()[0] == dangerous_string
 
 
 def test_simple_case():
